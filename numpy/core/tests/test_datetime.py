@@ -71,6 +71,118 @@ class TestDateTime(TestCase):
         assert_equal(x[0].astype(np.int64), 322689600000000000)
 
 
+class TestDateTimeStringConversion(TestCase):
+    def setUp(self):
+        self.datedict = {'Y' : '1980',
+                         'M' : '04',
+                         'D' : '20',
+                         'h' : '12',
+                         'm' : '13',
+                         's' : '14',
+                        'ms' : '123',
+                        'us' : '456',
+                        'ns' : '789',
+                        'ps' : '123',
+                        'fs' : '456',
+                        'as' : '789'}
+
+        self.year    = str(self.datedict['Y'])
+        self.month   = self.year    + '-' + str(self.datedict['M'])
+        self.week    = 'WEEK' # Not sure what the output of this should be
+        self.bday    = 'BDAY' # Not sure what the output of this should be
+        self.day     = self.month   + '-' + str(self.datedict['D'])
+        self.hour    = self.day     + ' ' + str(self.datedict['h'])
+        self.minute  = self.hour    + ':' + str(self.datedict['m'])
+        self.second  = self.minute  + ':' + str(self.datedict['s'])
+        self.msecond = self.second  + '.' + str(self.datedict['ms'])
+        self.usecond = self.msecond       + str(self.datedict['us'])
+        self.nsecond = self.usecond       + str(self.datedict['ns'])
+        self.psecond = self.nsecond       + str(self.datedict['ps'])
+        self.fsecond = self.psecond       + str(self.datedict['fs'])
+        self.asecond = self.fsecond       + str(self.datedict['as'])
+
+        self.date1 = str(self.datedict['Y']) + '-' + \
+                     str(self.datedict['M']) + '-' + \
+                     str(self.datedict['D']) + ' ' + \
+                     str(self.datedict['h']) + ':' + \
+                     str(self.datedict['m']) + ':' + \
+                     str(self.datedict['s']) + '.' + \
+                     str(self.datedict['ms']) + \
+                     str(self.datedict['us']) + \
+                     str(self.datedict['ns']) + \
+                     str(self.datedict['ps']) + \
+                     str(self.datedict['fs']) + \
+                     str(self.datedict['as'])
+
+        self.date2 = str(self.datedict['Y']) + '-' + \
+                     str(self.datedict['M']) + '-' + \
+                     str(int(self.datedict['D']) + 1) + ' ' + \
+                     str(self.datedict['h']) + ':' + \
+                     str(self.datedict['m']) + ':' + \
+                     str(self.datedict['s']) + '.' + \
+                     str(self.datedict['ms']) + \
+                     str(self.datedict['us']) + \
+                     str(self.datedict['ns']) + \
+                     str(self.datedict['ps']) + \
+                     str(self.datedict['fs']) + \
+                     str(self.datedict['as'])
+
+    def test_string_conversion_year(self):
+        assert_equal(str(np.array([self.date1], 'M8[Y]')[0]), self.year)
+
+    def test_string_conversion_month(self):
+        assert_equal(str(np.array([self.date1], 'M8[M]')[0]), self.month)
+
+    def test_string_conversion_week(self):
+        assert_equal(str(np.array([self.date1], 'M8[W]')[0]), self.week)
+
+    def test_string_conversion_bday(self):
+        assert_equal(str(np.array([self.date1], 'M8[B]')[0]), self.bday)
+
+    def test_string_conversion_day(self):
+        assert_equal(str(np.array([self.date1], 'M8[D]')[0]), self.day)
+
+    def test_string_conversion_hour(self):
+        assert_equal(str(np.array([self.date1], 'M8[h]')[0]), self.hour)
+
+    def test_string_conversion_minute(self):
+        assert_equal(str(np.array([self.date1], 'M8[m]')[0]), self.minute)
+
+    def test_string_conversion_second(self):
+        assert_equal(str(np.array([self.date1], 'M8[s]')[0]), self.second)
+
+    def test_string_conversion_ms(self):
+        assert_equal(str(np.array([self.date1], 'M8[ms]')[0]), self.msecond)
+
+    def test_string_conversion_us(self):
+        assert_equal(str(np.array([self.date1], 'M8[us]')[0]), self.usecond)
+
+    def test_string_conversion_ns(self):
+        assert_equal(str(np.array([self.date1], 'M8[ns]')[0]), self.nsecond)
+
+    def test_string_conversion_ps(self):
+        assert_equal(str(np.array([self.date1], 'M8[ps]')[0]), self.psecond)
+
+    def test_string_conversion_fs(self):
+        assert_equal(str(np.array([self.date1], 'M8[fs]')[0]), self.fsecond)
+
+    def test_string_conversion_as(self):
+        assert_equal(str(np.array([self.date1], 'M8[as]')[0]), self.asecond)
+
+    def test_string_conversion_array_addition_dtype(self):
+        for unit in self.datedict.keys():
+            a = np.array([self.date1], 'M8[%s]' % unit)
+            b = a + 1
+            assert_equal(b.dtype, a.dtype)
+
+    def test_string_conversion_array_addition_date(self):
+        for unit in self.datedict.keys():
+            a = np.array([self.date1], 'M8[%s]' % unit)
+            b = a + 1
+            c = np.array([self.date2], 'M8[%s]' % unit)
+            assert_equal(b[0], c[0])
+
+
 class TestDateTimeModulo(TestCase):
     def test_modulo_years(self):
         timesteps = np.array([0,1,2], dtype='datetime64[Y]//10')
@@ -375,6 +487,7 @@ class TestTimeDeltaAstype(TestCase):
     def test_timedelta_astype_attoseconds(self):
         timedeltas = np.array([0, 3, 2], dtype="timedelta64[fs]")
         assert_equal(timedeltas.astype('timedelta64[as]'), np.array([0, 3000, 2000], dtype="datetime64[as]"))
+
 
 
 if __name__ == "__main__":
